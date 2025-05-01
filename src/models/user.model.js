@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
-    name: {
+    userName: {
         type: String,
         required: true,
         unique: true,
@@ -11,7 +11,7 @@ const userSchema = new Schema({
         trim: true,
         index: true
     },
-    email: {
+    userEmail: {
         type: String,
         required: true,
         unique: true,
@@ -42,6 +42,10 @@ const userSchema = new Schema({
     },
     refreshToken: {
         type: String
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

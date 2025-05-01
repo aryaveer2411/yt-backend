@@ -47,7 +47,16 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     }
-}, { timestamps: true });
+}, {
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    toJSON: {
+        transform: (doc, ret) => {
+            ret.createdAt = Math.floor(new Date(ret.createdAt).getTime() / 1000); // Convert to epoch (seconds)
+            ret.updatedAt = Math.floor(new Date(ret.updatedAt).getTime() / 1000); // Convert to epoch (seconds)
+            return ret;
+        },
+    },
+});
 
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();

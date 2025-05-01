@@ -14,12 +14,12 @@ const registerUser = asyncHandler(async (req, res) => {
     //check if the user was saved successfully
     // if not, send a 500 error response
     // if the user was saved successfully, send a 201 response with the user details
-
+    console.log("req.body", req.body);
     const { userName, userEmail, fullName, password, isAdmin } = req.body;
     if ([userName, userEmail, fullName, password].some(field => field === "")) {
         throw new ApiError(400, "All fields are required", [], "Bad Request");
     }
-    const userExists = await User.findOne({ $or: { userName, userEmail } });
+    const userExists = await User.findOne({ $or: [{ userName }, { userEmail }] });
 
     if (userExists) {
         throw new ApiError(400, "User already exists", [], "Bad Request");
@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Failed to upload images", [], "Internal Server Error");
     }
     const newUser = new User({
-        username: userName.toLowerCase(),
+        userName: userName.toLowerCase(),
         userEmail,
         fullName,
         password,

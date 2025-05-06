@@ -1,8 +1,8 @@
-import { asyncHandler } from '../utils/asyncHandler.js';
-import { User } from '../models/user.model.js';
-import { ApiError } from '../utils/apiError.js';
-import { uploadOnCloudinary } from '../utils/cloudinary.js';
-import { ApiResponse } from "../utils/apiResponse.js";
+import { asyncHandler } from '../../utils/asyncHandler.js';
+import { User } from '../../models/user.model.js';
+import { ApiError } from '../../utils/apiError.js';
+import { uploadOnCloudinary } from '../../utils/cloudinary.js';
+import { ApiResponse } from "../../utils/apiResponse.js";
 
 const registerUser = asyncHandler(async (req, res) => {
     // Destructure the request body to get user details
@@ -28,34 +28,47 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!req.files?.avatar?.[0]) {
         throw new ApiError(400, "Please provide avatar", [], "Bad Request");
     }
+    let coverImageLocalPath = "";
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path;
+    }
 
     const avatarLocalPath = req.files.avatar[0].path;
-    const coverImageLocalPath = req.files.coverImage[0].path;
     const isAvatarUploded = await uploadOnCloudinary(avatarLocalPath);
     const isCoverImageUploded = await uploadOnCloudinary(coverImageLocalPath);
-    if (isAvatarUploded === null || isCoverImageUploded === null) {
+    if (isAvatarUploded === null) {
         throw new ApiError(500, "Failed to upload images", [], "Internal Server Error");
     }
-    const newUser = new User({
-        userName: userName.toLowerCase(),
-        userEmail,
-        fullName,
-        password,
-        isAdmin: isAdmin || false,
-        avatar: isAvatarUploded.url,
-        coverImage: isCoverImageUploded?.url || ""
-    });
 
-    const newUserCreated = await User.create(newUser);
+    try {
+        const newUser = new User({
+            userName: userName.toLowerCase(),
+            userEmail,
+            fullName,
+            password,
+            isAdmin: isAdmin || false,
+            avatar: isAvatarUploded.url,
+            coverImage: isCoverImageUploded?.url || ""
+        });
 
-    const isNewUserCreated = await User.findById(newUserCreated._id).select("-password -refreshToken");
-    if (!isNewUserCreated) {
-        throw new ApiError(500, "Failed to create user", [], "Internal Server Error");
+        const newUserCreated = await User.create(newUser);
+
+        const isNewUserCreated = await User.findById(newUserCreated._id).select("-password -refreshToken");
+        if (!isNewUserCreated) {
+            throw new ApiError(500, "Failed to create user", [], "Internal Server Error");
+        }
+
+        return res.status(201).json({
+            response: new ApiResponse(200, isNewUserCreated, "User Created", 200)
+        })
     }
-
-    return res.status(201).json({
-        response: new ApiResponse(200, isNewUserCreated, "User Created", 200)
-    })
+    catch (exception) {
+        console.error("User registration error:", exception);
+        if (exception.code === 11000) {
+            throw new ApiError(400, "Duplicate key error: User already exists", [], "Bad Request");
+        }
+        throw exception;
+    }
 
 })
 

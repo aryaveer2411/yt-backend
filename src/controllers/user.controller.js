@@ -4,6 +4,7 @@ import { ApiError } from '../utils/apiError.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import { ApiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
+import { response } from 'express';
 
 const options = {
     httpOnly: true,
@@ -169,7 +170,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Token Expired or Used");
         }
         const { refreshToken, accessToken } = await generateJWTTokens(user);
-    
+
         return res.status(201).cookie("refreshToken", refreshToken, options).cookie("accessToken", accessToken, options).json(
             new ApiResponse(200, {
                 "refreshToken": refreshToken,
@@ -212,8 +213,104 @@ const getAllUSers = asyncHandler(async (req, res) => {
     });
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+    const incomingAccessToken = req.cookies?.accessToken || req.header("accessToken");
+    const { currentPassword, newPassword } = req.body;
+    if (!incomingAccessToken) {
+        throw new ApiError(401, "Invalid request");
+        // logOutUser();
+    }
+    const user = await User.findById(req.user._id);
+    // this is all is being done by middleware
+    // const decodedToekn = jwt.verify(incomingAccessToken, process.env.ACCESS_TOKEN_SECRET);
+    // if (!decodedToekn) {
+    //     throw new ApiError(401, "Invalid request");
+    //     // logOutUser();
+    // }
+    // const user = await User.findById(decodedToekn._id);
+    // if (!user) {
+    //     throw new ApiError(401, "Invalid request");
+    //     // logOutUser();
+    // }
+    console.log(user.password);
+    const isPasswordMatch = user.isPasswordCorrect(currentPassword);
+    if (!isPasswordMatch) {
+        throw new ApiError(401, "Incorrect Password");
+    }
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
+    return res.status(201).json({
+        response: new ApiResponse(201, "Password changed")
+    });
+})
 
-export { registerUser, deleteUser, getAllUSers, loginUser, logOutUser, refreshAccessToken };
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res.status(200).json({
+        response: new ApiResponse(200, req.user, "Current user info")
+    }
+    )
+})
+
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+    const { userEmail, fullName } = req.body;
+    if (!userEmail || !fullName) {
+        return res.status(200).json({
+            response: new ApiResponse(201, "Nothing to update")
+        });
+    }
+    const user = req.user;
+    if (userEmail) user.userEmail = userEmail;
+    if (fullName) user.fullName = fullName;
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json({
+        response: new ApiResponse(201, {
+            userEmail: userEmail,
+            fullName: fullName
+        }, "Update Complete")
+    })
+})
+
+
+const updateUserMedia = asyncHandler(async (req, res) => {
+
+    let coverImageLocalPath = "";
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path;
+    }
+
+    let avatarPath = "";
+    if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
+        avatarPath = req.files.avatar[0].path;
+    }
+
+    if (coverImageLocalPath === "" && avatarPath === "") {
+        throw new ApiError(500, "Nothing to upload");
+    }
+    const user = req.user;
+    const isAvatarUploded = await uploadOnCloudinary(avatarPath);
+    const isCoverImageUploded = await uploadOnCloudinary(coverImageLocalPath);
+    if (avatarPath !== "") {
+        if (isAvatarUploded === null) {
+            throw new ApiError(500, "Failed to upload avatar", [], "Internal Server Error");
+        }
+        user.avatar = isAvatarUploded.url;
+    }
+
+    if (coverImageLocalPath !== "") {
+        if (isCoverImageUploded === null) {
+            throw new ApiError(500, "Failed to upload cover image", [], "Internal Server Error");
+        }
+        user.coverImage = isCoverImageUploded.url;
+    }
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json({
+        response: new ApiResponse(201, "Update Complete")
+    })
+})
+
+export { registerUser, deleteUser, getAllUSers, loginUser, logOutUser, refreshAccessToken, changePassword, getCurrentUser, updateAccountDetails, updateUserMedia };
 
 
 

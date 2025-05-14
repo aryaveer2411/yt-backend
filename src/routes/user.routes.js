@@ -10,6 +10,8 @@ import {
     getCurrentUser,
     updateAccountDetails,
     updateUserMedia,
+    getUserChannelProfile,
+    getUserWatchHistory,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
@@ -54,5 +56,7 @@ userRouter.route("/update-user-media").put(
     ]),
     updateUserMedia,
 );
+userRouter.route("/channel/:userName").get(verifyJwt, getUserChannelProfile);
+userRouter.route("/watch-history").get(verifyJwt, getUserWatchHistory);
 
 export default userRouter;

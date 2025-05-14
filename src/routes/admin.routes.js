@@ -1,5 +1,5 @@
-import Router from 'express';
-import { isAdmin } from '../controllers/admin.controller.js';
+import Router from "express";
+import { isAdmin } from "../controllers/admin.controller.js";
 const adminRouter = Router();
 
 adminRouter.route("/").get(isAdmin);

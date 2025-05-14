@@ -4,23 +4,24 @@ import connectDB from "./db/index.js";
 import app from "./app.js";
 
 dotenv.config({
-    path: "./env"
-})
+    path: "./env",
+});
 
 const port = process.env.PORT;
 
-connectDB().then(() => {
-
-    app.on("error", (error) => {
-        console.log("err:", error);
-        throw error;
+connectDB()
+    .then(() => {
+        app.on("error", (error) => {
+            console.log("err:", error);
+            throw error;
+        });
+        app.listen(port, () => {
+            console.log(`Listining on Port: ${port}`);
+        });
     })
-    app.listen(port, () => {
-        console.log(`Listining on Port: ${port}`)
-    })
-}).catch((err) => {
-    console.error("Mongo db connection failed!!!", err);
-});
+    .catch((err) => {
+        console.error("Mongo db connection failed!!!", err);
+    });
 
 /*
 const app = express();
@@ -41,4 +42,4 @@ const app = express();
         throw error;
     }
 })()
-    */ 
+    */

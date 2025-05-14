@@ -1,16 +1,14 @@
-
 // //higher order method
 const asyncHandler = (fnc) => async (req, res, next) => {
     try {
         await fnc(req, res, next);
-    }
-    catch (err) {
+    } catch (err) {
         res.status(err.code || 500).json({
             success: false,
-            message: err.message
-        })
+            message: err.message,
+        });
     }
-}
+};
 
 // const asyncHandler = (fnc) => {
 //     (req, res, next) => {
@@ -18,4 +16,4 @@ const asyncHandler = (fnc) => async (req, res, next) => {
 //     }
 // }
 
-export { asyncHandler };  
+export { asyncHandler };

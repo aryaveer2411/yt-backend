@@ -50,7 +50,7 @@ const userSchema = new Schema(
         },
     },
     {
-        timestamps: true, // Automatically adds createdAt and updatedAt fields
+        timestamps: true,
         toJSON: {
             transform: (doc, ret) => {
                 ret.createdAt = Math.floor(

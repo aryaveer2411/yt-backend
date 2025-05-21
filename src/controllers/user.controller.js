@@ -239,6 +239,8 @@ const deleteUser = asyncHandler(async (req, res) => {
     if (!isUserExist) {
         throw new ApiError(400, "user doesnt exist");
     }
+    await deleteFromCloudinary(isUserExist.avatar.public_id);
+    await deleteFromCloudinary(isUserExist.coverImage.public_id);
     const userDeleted = await User.findByIdAndDelete(userID).lean();
     if (!userDeleted) {
         throw new ApiError(400, "Cant fullfill opertaion");
@@ -365,7 +367,11 @@ const updateUserMedia = asyncHandler(async (req, res) => {
                 "Internal Server Error",
             );
         }
-        user.avatar = isAvatarUploded.url;
+        await deleteFromCloudinary(user.avatar.public_id);
+        user.avatar = {
+            url: isAvatarUploded.url,
+            public_id: isAvatarUploded.public_id,
+        };
     }
 
     if (coverImageLocalPath !== "") {
@@ -377,7 +383,11 @@ const updateUserMedia = asyncHandler(async (req, res) => {
                 "Internal Server Error",
             );
         }
-        user.coverImage = isCoverImageUploded.url;
+        await deleteFromCloudinary(user.coverImage.public_id);
+        user.coverImage = {
+            url: isCoverImageUploded.url,
+            public_id: isCoverImageUploded.public_id,
+        };
     }
     await user.save({ validateBeforeSave: false });
     return res.status(200).json({

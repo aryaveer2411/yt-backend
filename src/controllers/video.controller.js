@@ -58,6 +58,15 @@ const publishAVideo = asyncHandler(async (req, res) => {
         );
     }
 
+    if (videoToUpload.mimetype !== "video/mp4") {
+        throw new ApiError(400, "Only MP4 videos are allowed");
+    }
+
+    const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedImageTypes.includes(thumbnail.mimetype)) {
+        throw new ApiError(400, "Thumbnail must be a JPEG, PNG, or WEBP image");
+    }
+
     const isVideoUploded = await uploadOnCloudinary(videoToUpload.path);
 
     const isThumbnailUploded = await uploadOnCloudinary(thumbnail.path);
@@ -98,9 +107,11 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw new ApiError(401, "video id is missing");
     }
     const video = await Video.findById(videoId);
+    await video.save({ validateBeforeSave: false });
     if (!video) {
         throw new ApiError(401, "Video with video id doesnt exist");
     }
+    video.views+=1;
     return res.status(200).json({
         response: new ApiResponse(200, video, "Video link"),
     });

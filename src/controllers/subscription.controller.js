@@ -7,6 +7,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 const toggleSubscription = asyncHandler(async (req, res) => {
     const { channelId } = req.params;
+    const userID = req.user._id;
+    if (!channelId && !userID) {
+        throw new ApiError(401,"Either user is logged out or channel id is wrong")
+    }
+    const isSubscribed = Subscription.findOne({ subscriber:userID });
     // TODO: toggle subscription
 });
 
@@ -18,6 +23,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.params;
+
 });
 
 export { toggleSubscription, getUserChannelSubscribers, getSubscribedChannels };

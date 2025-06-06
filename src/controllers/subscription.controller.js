@@ -30,7 +30,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
             channel: channelId,
         });
         return res.status(200).json({
-            response: new ApiResponse(200, sub, "Subscription removed"),
+            response: new ApiResponse(200, null, "Subscription removed"),
         });
     } else {
         const subscribeToChannel = Subscription({
@@ -46,7 +46,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         return res.status(200).json({
             response: new ApiResponse(200, sub, "Subscription done"),
         });
-    }n
+    }
 });
 
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {

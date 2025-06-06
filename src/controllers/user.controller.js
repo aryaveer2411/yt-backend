@@ -386,7 +386,7 @@ const updateUserMedia = asyncHandler(async (req, res) => {
         await deleteFromCloudinary(user.coverImage.public_id);
         user.coverImage = {
             url: isCoverImageUploded.url,
-            public_id: isCoverImageUploded.public_id,
+            public_id: isCoverImageUploded.public_id, 
         };
     }
     await user.save({ validateBeforeSave: false });

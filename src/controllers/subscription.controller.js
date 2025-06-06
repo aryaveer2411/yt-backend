@@ -6,24 +6,141 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const toggleSubscription = asyncHandler(async (req, res) => {
-    const { channelId } = req.params;
     const userID = req.user._id;
-    if (!channelId && !userID) {
-        throw new ApiError(401,"Either user is logged out or channel id is wrong")
+    if (!userID) {
+        throw new ApiError(401, "User is logged out");
     }
-    const isSubscribed = Subscription.findOne({ subscriber:userID });
-    // TODO: toggle subscription
+    const { channelId } = req.params;
+    if (!channelId) {
+        throw new ApiError(401, "Enter channel id");
+    }
+    const channel = await User.findById(channelId);
+    if (!channel) {
+        throw new ApiError(401, "Channel with this id doesnt exist");
+    }
+
+    const isSubscribed = await Subscription.findOne({
+        subscriber: userID,
+        channel: channelId,
+    });
+
+    if (isSubscribed) {
+        await Subscription.deleteOne({
+            subscriber: userID,
+            channel: channelId,
+        });
+        return res.status(200).json({
+            response: new ApiResponse(200, sub, "Subscription removed"),
+        });
+    } else {
+        const subscribeToChannel = Subscription({
+            subscriber: userID,
+            channel: channelId,
+        });
+        const sub = await Subscription.create(subscribeToChannel);
+
+        if (!sub) {
+            throw new ApiError(400, "Cant save sub in db");
+        }
+
+        return res.status(200).json({
+            response: new ApiResponse(200, sub, "Subscription done"),
+        });
+    }n
 });
 
-// controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const { channelId } = req.params;
+    const subscribers = await User.aggregate([
+        {
+            $match: {
+                _id: channelId,
+            },
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribers",
+            },
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers",
+                }
+            },
+        },
+        {
+            $project: {
+                fullName: 1,
+                userName: 1,
+                subscribersCount: 1,
+                avatar: 1,
+                coverImage: 1,
+            },
+        },
+    ]);
+    if (!subscribers?.length) {
+        throw new ApiError(400, "Subscribers doesnt exist");
+    }
+    console.log("subscribers", subscribers);
+
+    return res.status(201).json({
+        response: new ApiResponse(
+            201,
+            subscribers,
+            "subscribers fetched successfully",
+        ),
+    });
 });
 
-// controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.params;
+    const channels = await User.aggregate([
+        {
+            $match: {
+                _id: subscriberId,
+            },
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribedChannels",
+            },
+        },
+        {
+            $addFields: {
+                subscribedChannels: {
+                    $size: "$subscribedChannels",
+                },
+            },
+        },
+        {
+            $project: {
+                fullName: 1,
+                userName: 1,
+                subscribedChannels: 1,
+                avatar: 1,
+                coverImage: 1,
+            },
+        },
+    ]);
+    if (!channels?.length) {
+        throw new ApiError(400, "channels doesnt exist");
+    }
+    console.log("channels", channels);
 
+    return res.status(201).json({
+        response: new ApiResponse(
+            201,
+            channels,
+            "channels fetched successfully",
+        ),
+    });
 });
 
 export { toggleSubscription, getUserChannelSubscribers, getSubscribedChannels };

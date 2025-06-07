@@ -5,15 +5,18 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-const getAllTweets = asyncHandler(async (req, res) => {
-    const tweets = Tweet.find({ });
+const getAllTweets = asyncHandler(async (req, res) => { 
+    const tweets = await Tweet.find({ });
     return res.status(200).json({
         response: new ApiResponse(200, tweets, "Tweets fetched"),
     });
 });
 
 const createTweet = asyncHandler(async (req, res) => {
-    const {tweetData} = res.body;
+    const { tweetData } = req.body;
+    if (!tweetData || typeof tweetData !== "string" || tweetData.trim() === "") {
+        throw new ApiError(400, "Invalid tweet data");
+    }
     const userId = req.user._id;
     const tweet = Tweet({
         content: tweetData,
@@ -29,23 +32,28 @@ const createTweet = asyncHandler(async (req, res) => {
 });
 
 const getUserTweets = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
-    const tweets = Tweet.find({ owner: userId });
+    const { userId } = req.params;
+    console.log(userId);
+    if (!isValidObjectId(userId)) {
+        throw new ApiError(400, "Invalid user ID");
+    }
+    const tweets = await Tweet.find({ owner: userId });
     return res.status(200).json({
         response: new ApiResponse(200, tweets, "User tweets fetched"),
     });
 });
 
 const updateTweet = asyncHandler(async (req, res) => {
-    const {tweetId,tweetData} = req.body;
+    const { tweetId } = req.params;
+    const {tweetData} = req.body;
     const userID = req.user._id;
     if (!isValidObjectId(tweetId)) {
         throw new ApiError(400, "Invalid tweet ID");
     }
     const tweet = await Tweet.findOneAndUpdate(
         { _id: tweetId, owner: userID },
-        { $set: tweetData },
-        { new: true }
+        { $set: { content: tweetData } },
+        { new: true },
     );
     if (!tweet) {
         throw new ApiError(404, "Tweet not found or you are not the owner");
@@ -56,7 +64,7 @@ const updateTweet = asyncHandler(async (req, res) => {
 });
 
 const deleteTweet = asyncHandler(async (req, res) => {
-    const { tweetId } = req.body;
+    const { tweetId } = req.params;
     const userID = req.user._id;
     if (!isValidObjectId(tweetId)) {
         throw new ApiError(400, "Invalid tweet ID");

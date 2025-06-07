@@ -132,6 +132,36 @@ const loginUser = asyncHandler(async (req, res) => {
     // generate access and ref toekns
     //send cookie
 
+
+
+    // const avatarUrl =
+    //     "http://res.cloudinary.com/dlhnaowqk/image/upload/v1746554642/jnxpnzqnmhinx8e70hwo.jpg";
+    // const coverImageUrl =
+    //     "http://res.cloudinary.com/dlhnaowqk/image/upload/v1746554643/ljr0s73dijom3ugvunae.jpg";
+
+    // // Generate 20 user objects
+    // const users = Array.from({ length: 20 }, (_, i) => ({
+    //     userName: `user${i + 1}`,
+    //     userEmail: `user${i + 1}@example.com`,
+    //     fullName: `User ${i + 1}`,
+    //     password: "123456789",
+    //     isAdmin: false,
+    //     avatar: {
+    //         url: avatarUrl,
+    //         public_id: `avatar_public_id_${i + 1}`,
+    //     },
+    //     coverImage: {
+    //         url: coverImageUrl,
+    //         public_id: `cover_public_id_${i + 1}`,
+    //     },
+    // }));
+
+    // console.log(users);
+
+    // const createdUsers = await User.insertMany(users, { ordered: false });
+
+    // console.log("Users created:", createdUsers.length);
+
     const { userEmail, userName, password } = req.body;
     if ((!userEmail || !userName) && !password) {
         throw new ApiError(

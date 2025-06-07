@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"; 
 import { Comment } from "../models/comment.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
@@ -83,7 +83,7 @@ const deleteComment = asyncHandler(async (req, res) => {
     if (comment.owner.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "You do not have permission to delete this comment");
     }
-    await comment.remove();
+    await comment.deleteOne();
     return res.status(200).json({
         response: new ApiResponse(200, null, "Comment deleted successfully"),
     });

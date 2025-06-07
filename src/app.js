@@ -43,15 +43,15 @@ app.use("/api/v1/admin", adminRouter);
 
 app.use("/api/v1/video", videoRouter);
 
-app.use("/api/v1/subscriptions", subscriptionRouter);
+app.use("/api/v1/subscription", subscriptionRouter);
 
-app.use("/api/v1/tweets", tweetRouter);
+app.use("/api/v1/tweet", tweetRouter);
 
-app.use("/api/v1/playlists", playlistRouter);
+app.use("/api/v1/playlist", playlistRouter);
 
-app.use("/api/v1/likes", likeRouter);
+app.use("/api/v1/like", likeRouter);
 
-app.use("/api/v1/comments", commentRouter);
+app.use("/api/v1/comment", commentRouter);
 
 //routes declaration
 export default app;

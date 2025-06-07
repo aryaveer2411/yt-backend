@@ -23,7 +23,7 @@ in the end we count objects which will tell a channel subscribers and user subsc
 */
 
 const subscriptionSchema = new Schema(
-    {
+    { 
         subscriber: {
             type: Schema.Types.ObjectId,
             ref: "User",

@@ -1,6 +1,6 @@
 # YouTube Backend API
 
-This is the backend API for your YouTube-like application, built with Node.js, Express, and MongoDB.
+This is the backend API for YouTube-like application, built with Node.js, Express, and MongoDB.
 
 ---
 
@@ -28,26 +28,6 @@ Backend is live at:
 ```
 https://yt-backend-iweb.onrender.com/api/v1/
 ```
-
----
-
-## 🗂️ Main Endpoints
-
-| Resource      | Endpoint Example                                      | Description                       |
-|---------------|-------------------------------------------------------|-----------------------------------|
-| User          | `/user/register`                                      | Register a new user               |
-| User          | `/user/login`                                         | Login a user                      |
-| Video         | `/video`                                              | Get all videos                    |
-| Playlist      | `/playlist/user/:userId`                              | Get all playlists for a user      |
-| Subscription  | `/subscription/c/:subscriberId`                       | Get channels a user is subscribed to |
-| Subscription  | `/subscription/u/:channelId`                          | Get subscribers of a channel      |
-| Tweet         | `/tweet/user/:userId`                                 | Get all tweets by a user          |
-| Like          | `/like/video/:videoId`                                | Like a video                      |
-| Comment       | `/comment/video/:videoId`                             | Get comments for a video          |
-
-> **Note:** All endpoints are prefixed with `/api/v1/`.
-
----
 
 ## 🔑 Authentication
 

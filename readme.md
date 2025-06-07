@@ -6,7 +6,7 @@ This is the backend API for your YouTube-like application, built with Node.js, E
 
 ## 🚀 Deployment
 
-Your backend is live at:  
+Backend is live at:  
 **[https://yt-backend-iweb.onrender.com](https://yt-backend-iweb.onrender.com)**
 
 ---

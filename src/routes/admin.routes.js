@@ -4,4 +4,4 @@ const adminRouter = Router();
 
 adminRouter.route("/").get(isAdmin);
 
-export default adminRouter;
+export default adminRouter; 

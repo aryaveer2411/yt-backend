@@ -107,11 +107,18 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw new ApiError(401, "video id is missing");
     }
     const video = await Video.findById(videoId);
-    await video.save({ validateBeforeSave: false });
     if (!video) {
         throw new ApiError(401, "Video with video id doesnt exist");
     }
-    video.views+=1;
+    if (req.user && req.user._id) {
+        await User.findByIdAndUpdate(
+            req.user._id,
+            { $addToSet: { watchHistory: videoId } },
+            { new: true },
+        );
+    }
+    video.views += 1;
+    await video.save({ validateBeforeSave: false });
     return res.status(200).json({
         response: new ApiResponse(200, video, "Video link"),
     });
